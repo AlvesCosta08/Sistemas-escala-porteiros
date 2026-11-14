@@ -21,18 +21,20 @@ class PerfilController extends Controller
     {
         $this->salvarFoto($request->user(), $request->file('foto'));
 
+        // Restaurado para o padrão que o teste exige
         return redirect()
             ->route(auth()->user()->isAdmin() ? 'perfil.edit' : 'minha-escala')
-            ->with('status', 'Foto atualizada.');
+            ->with('success', 'Foto atualizada.');
     }
 
     public function updateFotoAdmin(UpdateFotoRequest $request, User $user): RedirectResponse
     {
         $this->salvarFoto($user, $request->file('foto'));
 
+        // Após o admin atualizar a foto de alguém, ele volta para a tela de edição dessa pessoa
         return redirect()
-            ->route('admin.ausencias.index')
-            ->with('status', "Foto de {$user->name} atualizada.");
+            ->route('admin.usuarios.edit', $user)
+            ->with('success', "Foto de {$user->name} atualizada.");
     }
 
     /**
