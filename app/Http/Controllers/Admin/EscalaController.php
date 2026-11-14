@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Alocacao;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+
+class EscalaController extends Controller
+{
+    public function index(Request $request)
+    {
+        // Mês de referência: ?mes=YYYY-MM ou o mês atual
+        $mes = $request->get('mes', now()->format('Y-m'));
+
+        // Garante formato válido (senão cai para o mês atual)
+        if (! preg_match('/^\d{4}-\d{2}$/', $mes)) {
+            $mes = now()->format('Y-m');
+        }
+
+        $referencia = Carbon::createFromFormat('Y-m', $mes)->startOfMonth();
+
+        $alocacoes = Alocacao::with([
+                'user:id,name,foto_thumb_path',
+                'posto:id,nome',
+                'turno:id,nome,hora_inicio,hora_fim',
+            ])
+            ->whereYear('data', $referencia->year)
+            ->whereMonth('data', $referencia->month)
+            ->orderBy('data')
+            ->get()
+            ->groupBy(fn (Alocacao $a) => $a->data->format('Y-m-d'));
+
+        return view('admin.escalas.index', [
+            'alocacoesPorDia' => $alocacoes,
+            'mes' => $mes,
+            'referencia' => $referencia,
+        ]);
+    }
+}

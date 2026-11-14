@@ -1,0 +1,178 @@
+<?php
+
+namespace App\Models;
+
+use Carbon\Carbon;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Traits\HasRoles;
+
+#[Fillable([
+    'name',
+    'email',
+    'password',
+    'cargo',
+    'phone',
+    'foto_path',
+    'foto_thumb_path',
+    'active',
+])]
+#[Hidden(['password', 'remember_token'])]
+class User extends Authenticatable
+{
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, HasRoles, Notifiable;
+
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'active' => 'boolean',
+        ];
+    }
+
+    // ---------------------------------------------------------------------
+    // Relacionamentos
+    // ---------------------------------------------------------------------
+
+    public function alocacoes(): HasMany
+    {
+        return $this->hasMany(Alocacao::class);
+    }
+
+    public function avisosAusencia(): HasMany
+    {
+        return $this->hasMany(AvisoAusencia::class);
+    }
+
+    public function substituicoes(): HasMany
+    {
+        return $this->hasMany(AvisoAusencia::class, 'substituto_user_id');
+    }
+
+    // ---------------------------------------------------------------------
+    // Helpers de perfil
+    // ---------------------------------------------------------------------
+
+    public function isAdmin(): bool
+    {
+        return $this->cargo === 'admin' || $this->hasRole('admin');
+    }
+
+    public function isPorteiro(): bool
+    {
+        return $this->cargo === 'porteiro';
+    }
+
+    public function isRecepcionista(): bool
+    {
+        return $this->cargo === 'recepcionista';
+    }
+
+    public function fotoThumbUrl(): ?string
+    {
+        return $this->foto_thumb_path
+            ? Storage::disk('public')->url($this->foto_thumb_path)
+            : null;
+    }
+
+    // ---------------------------------------------------------------------
+    // Elegibilidade para substituição (ciclo 3)
+    // ---------------------------------------------------------------------
+
+    /**
+     * Retorna os colaboradores elegíveis para substituir o solicitante
+     * de uma alocação, aplicando três regras:
+     *
+     *   R1 — mesma função (cargo) do solicitante
+     *   R2 — sem alocação no mesmo dia + turno da alocação proposta
+     *   R3 — sem violação do intervalo mínimo de 11h entre turnos
+     *
+     * @return Collection<int, User>
+     */
+    public static function elegiveisParaSubstituir(Alocacao $alocacao): Collection
+    {
+        $solicitante = $alocacao->user;
+
+        return static::query()
+            ->where('cargo', $solicitante->cargo)
+            ->where('active', true)
+            ->where('id', '!=', $solicitante->id)
+            ->get()
+            ->filter(fn (User $candidato) => ! static::temConflitoDeEscala($candidato->id, $alocacao))
+            ->values();
+    }
+
+    /**
+     * Verifica se o colaborador tem conflito de escala com a alocação proposta.
+     */
+    protected static function temConflitoDeEscala(int $userId, Alocacao $alocacao): bool
+    {
+        // R2 — mesmo dia + mesmo turno
+        $conflitoDireto = Alocacao::query()
+            ->where('user_id', $userId)
+            ->whereDate('data', $alocacao->data)
+            ->where('turno_id', $alocacao->turno_id)
+            ->where('status', '!=', 'substituida')
+            ->exists();
+
+        if ($conflitoDireto) {
+            return true;
+        }
+
+        // R3 — intervalo mínimo de 11h
+        $propostoInicio = Carbon::parse(
+            $alocacao->data->format('Y-m-d').' '.$alocacao->turno->hora_inicio
+        );
+        $propostoFim = Carbon::parse(
+            $alocacao->data->format('Y-m-d').' '.$alocacao->turno->hora_fim
+        );
+        if ($propostoFim->lte($propostoInicio)) {
+            $propostoFim->addDay();
+        }
+
+        $vizinhas = Alocacao::query()
+            ->where('user_id', $userId)
+            ->where('status', '!=', 'substituida')
+            ->whereBetween('data', [
+                $alocacao->data->copy()->subDays(2),
+                $alocacao->data->copy()->addDays(2),
+            ])
+            ->with('turno')
+            ->get();
+
+        foreach ($vizinhas as $existente) {
+            $existenteInicio = Carbon::parse(
+                $existente->data->format('Y-m-d').' '.$existente->turno->hora_inicio
+            );
+            $existenteFim = Carbon::parse(
+                $existente->data->format('Y-m-d').' '.$existente->turno->hora_fim
+            );
+            if ($existenteFim->lte($existenteInicio)) {
+                $existenteFim->addDay();
+            }
+
+            if ($existenteFim->lte($propostoInicio)) {
+                if (abs($existenteFim->diffInHours($propostoInicio)) < 11) {
+                    return true;
+                }
+            } elseif ($propostoFim->lte($existenteInicio)) {
+                if (abs($propostoFim->diffInHours($existenteInicio)) < 11) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
