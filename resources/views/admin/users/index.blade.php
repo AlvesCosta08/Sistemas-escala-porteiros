@@ -1,99 +1,79 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Gerenciar Colaboradores - Obede</title>
-    <style>
-        body { font-family: sans-serif; background: #f3f4f6; padding: 2rem; margin: 0; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem; }
-        h1 { color: #111827; margin: 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb; }
-        th { background: #f9fafb; font-size: 0.85rem; color: #6b7280; text-transform: uppercase; }
-        .btn { padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-size: 0.875rem; cursor: pointer; border: none; display: inline-block; }
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-secondary { background: #e5e7eb; color: #374151; }
-        .btn-edit { background: #f59e0b; color: white; }
-        .btn-toggle { background: #ef4444; color: white; }
-        .btn-toggle.active { background: #10b981; }
-        .alert { padding: 1rem; border-radius: 4px; margin-bottom: 1rem; }
-        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
-        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
-        .badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: bold; }
-        .badge-admin { background: #fee2e2; color: #991b1b; }
-        .badge-porteiro { background: #dbeafe; color: #1e40af; }
-        .badge-recepcionista { background: #fce7f3; color: #9d174d; }
-        .status-ativo { color: #059669; font-weight: bold; }
-        .status-inativo { color: #dc2626; font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Gerenciar Colaboradores</h1>
-            <div>
-                <a href="{{ route('admin.ausencias.index') }}" class="btn btn-secondary">Voltar ao Painel</a>
-                <a href="{{ route('admin.usuarios.create') }}" class="btn btn-primary">+ Novo Colaborador</a>
-            </div>
-        </div>
+@extends('layouts.app')
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if(session('error'))
-            <div class="alert alert-error">{{ session('error') }}</div>
-        @endif
+@section('title', 'Colaboradores')
+@section('header', 'Gerenciar Colaboradores')
 
-        <table>
+@section('content')
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div class="flex justify-between items-center mb-6">
+        <p class="text-gray-500 text-sm">Lista de todos os funcionários cadastrados no sistema.</p>
+        <a href="{{ route('admin.usuarios.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">
+            + Novo Colaborador
+        </a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
             <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>E-mail</th>
-                    <th>Cargo</th>
-                    <th>Status</th>
-                    <th>Ações</th>
+                <tr class="bg-gray-50 text-gray-600 uppercase text-xs leading-normal border-b border-gray-200">
+                    <th class="py-3 px-4 font-semibold">Nome</th>
+                    <th class="py-3 px-4 font-semibold">E-mail</th>
+                    <th class="py-3 px-4 font-semibold">Cargo</th>
+                    <th class="py-3 px-4 font-semibold">Status</th>
+                    <th class="py-3 px-4 font-semibold text-center">Ações</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($users as $user)
-                <tr>
-                    <td>{{ $user->name }}</td>
-                    <td>{{ $user->email }}</td>
-                    <td>
-                        <span class="badge badge-{{ $user->cargo }}">{{ ucfirst($user->cargo) }}</span>
+            <tbody class="text-gray-600 text-sm">
+                @foreach($users as $user)
+                <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="py-3 px-4">
+                        <div class="flex items-center">
+                            @if($user->foto_thumb_path)
+                                <img class="w-8 h-8 rounded-full mr-3 object-cover" src="{{ Storage::disk('public')->url($user->foto_thumb_path) }}" alt="">
+                            @else
+                                <div class="w-8 h-8 rounded-full mr-3 bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
+                                    {{ substr($user->name, 0, 1) }}
+                                </div>
+                            @endif
+                            <span class="font-medium">{{ $user->name }}</span>
+                        </div>
                     </td>
-                    <td>
-                        <span class="{{ $user->active ? 'status-ativo' : 'status-inativo' }}">
+                    <td class="py-3 px-4">{{ $user->email }}</td>
+                    <td class="py-3 px-4">
+                        @php
+                            $badgeColor = match($user->cargo) {
+                                'admin' => 'bg-red-100 text-red-700',
+                                'porteiro' => 'bg-blue-100 text-blue-700',
+                                'recepcionista' => 'bg-purple-100 text-purple-700',
+                                default => 'bg-gray-100 text-gray-700',
+                            };
+                        @endphp
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $badgeColor }}">
+                            {{ ucfirst($user->cargo) }}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $user->active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600' }}">
                             {{ $user->active ? 'Ativo' : 'Inativo' }}
                         </span>
                     </td>
-                    <td>
-                        <a href="{{ route('admin.usuarios.edit', $user) }}" class="btn btn-edit">Editar</a>
-                        
+                    <td class="py-3 px-4 text-center">
+                        <a href="{{ route('admin.usuarios.edit', $user) }}" class="text-orange-500 hover:text-orange-700 font-semibold mr-3 text-xs">Editar</a>
                         @if(auth()->id() !== $user->id)
-                        <form action="{{ route('admin.usuarios.toggle', $user) }}" method="POST" style="display:inline;">
+                        <form action="{{ route('admin.usuarios.toggle', $user) }}" method="POST" class="inline">
                             @csrf
                             @method('PATCH')
-                            <button type="submit" class="btn btn-toggle {{ $user->active ? 'active' : '' }}">
+                            <button type="submit" class="text-red-500 hover:text-red-700 font-semibold text-xs">
                                 {{ $user->active ? 'Desativar' : 'Ativar' }}
                             </button>
                         </form>
                         @endif
                     </td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="5" style="text-align: center; color: #6b7280;">Nenhum colaborador cadastrado.</td>
-                </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
-        
-        <div style="margin-top: 1.5rem;">
-            {{ $users->links() }}
-        </div>
     </div>
-</body>
-</html>
+    <div class="mt-6">{{ $users->links() }}</div>
+</div>
+@endsection

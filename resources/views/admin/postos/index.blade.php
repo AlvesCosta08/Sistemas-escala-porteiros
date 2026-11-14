@@ -1,63 +1,43 @@
-cat > resources/views/admin/postos/index.blade.php << 'EOF'
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Postos - Obede</title>
-    <style>
-        body { font-family: sans-serif; background: #f3f4f6; padding: 2rem; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb; }
-        th { background: #f9fafb; font-size: 0.85rem; color: #6b7280; text-transform: uppercase; }
-        .btn { padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-size: 0.875rem; cursor: pointer; border: none; }
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-edit { background: #f59e0b; color: white; }
-        .btn-secondary { background: #e5e7eb; color: #374151; }
-        .alert-success { background: #d1fae5; color: #065f46; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Postos de Trabalho</h1>
-            <div>
-                <a href="{{ route('admin.usuarios.index') }}" class="btn btn-secondary">Colaboradores</a>
-                <a href="{{ route('admin.postos.create') }}" class="btn btn-primary">+ Novo Posto</a>
-            </div>
-        </div>
+@extends('layouts.app')
 
-        @if(session('success'))
-            <div class="alert-success">{{ session('success') }}</div>
-        @endif
+@section('title', 'Postos')
+@section('header', 'Postos de Trabalho')
 
-        <table>
+@section('content')
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div class="flex justify-between items-center mb-6">
+        <p class="text-gray-500 text-sm">Locais onde os colaboradores exercem suas funções.</p>
+        <a href="{{ route('admin.postos.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">
+            + Novo Posto
+        </a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
             <thead>
-                <tr>
-                    <th>Nome do Posto</th>
-                    <th>Descrição</th>
-                    <th>Ações</th>
+                <tr class="bg-gray-50 text-gray-600 uppercase text-xs leading-normal border-b border-gray-200">
+                    <th class="py-3 px-4 font-semibold">Nome do Posto</th>
+                    <th class="py-3 px-4 font-semibold">Descrição</th>
+                    <th class="py-3 px-4 font-semibold text-center">Ações</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="text-gray-600 text-sm">
                 @forelse($postos as $posto)
-                <tr>
-                    <td>{{ $posto->nome }}</td>
-                    <td>{{ $posto->descricao ?? '-' }}</td>
-                    <td>
-                        <a href="{{ route('admin.postos.edit', $posto) }}" class="btn btn-edit">Editar</a>
+                <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="py-3 px-4 font-medium">{{ $posto->nome }}</td>
+                    <td class="py-3 px-4">{{ $posto->descricao ?? '-' }}</td>
+                    <td class="py-3 px-4 text-center">
+                        <a href="{{ route('admin.postos.edit', $posto) }}" class="text-orange-500 hover:text-orange-700 font-semibold text-xs">Editar</a>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="3" style="text-align: center;">Nenhum posto cadastrado.</td>
+                    <td colspan="3" class="py-6 text-center text-gray-500">Nenhum posto cadastrado.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
-        <div style="margin-top: 1.5rem;">{{ $postos->links() }}</div>
     </div>
-</body>
-</html>
-EOF
+    <div class="mt-6">{{ $postos->links() }}</div>
+</div>
+@endsection
