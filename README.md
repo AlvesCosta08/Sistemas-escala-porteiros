@@ -1,3 +1,4 @@
+cat > README.md << 'MDEOF'
 <div align="center">
 
 # Obede
@@ -17,7 +18,7 @@
 
 **Obede** é uma aplicação web para gerenciar escalas de porteiros e recepcionistas de condomínios. Cobre o ciclo completo — do cadastro de postos e turnos até a efetivação de substituições em caso de ausência — com validação de conflitos, notificações e calendário visual.
 
-Foi projetado para resolver três dores operacionais típicas:
+Resolve três dores operacionais típicas:
 
 - **Escala dispersa** — antes em planilhas, hoje em um calendário único e consultável por cada colaborador.
 - **Ausências descoordenadas** — colaborador sinaliza indisponibilidade; admin vê avisos urgentes primeiro e aloca substituto com bloqueio automático de conflitos.
@@ -78,14 +79,14 @@ Duas *tools* expostas via [Model Context Protocol](https://modelcontextprotocol.
 
 | Camada | Tecnologia |
 |---|---|
-| Linguagem | PHP 8.3 |
+| Linguagem | PHP 8.4+ |
 | Framework | Laravel 11+ |
 | Permissões | [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission) |
-| Banco (dev) | SQLite |
+| Banco (dev) | MySQL 8 |
 | Banco (prod) | MySQL 8 |
 | Banco (CI) | SQLite em memória |
 | Imagens | GD (thumbnails WebP) |
-| Testes | PHPUnit |
+| Testes | PHPUnit (40 testes, 93 assertions) |
 | CI | GitHub Actions |
 | Integração IA | Model Context Protocol (MCP) |
 
@@ -93,32 +94,47 @@ Duas *tools* expostas via [Model Context Protocol](https://modelcontextprotocol.
 
 ## Pré-requisitos
 
-- **PHP 8.3+** com extensões:
-  `ctype`, `curl`, `dom`, `fileinfo`, `filter`, `gd`, `hash`, `mbstring`, `openssl`, `pcre`, `pdo`, `pdo_sqlite`, `session`, `tokenizer`, `xml`
+- **PHP 8.4+** com extensões:
+  `ctype`, `curl`, `dom`, `fileinfo`, `filter`, `gd`, `hash`, `mbstring`, `openssl`, `pcre`, `pdo`, `pdo_mysql`, `pdo_sqlite`, `session`, `tokenizer`, `xml`
 - **Composer 2**
 - **Node.js 20+** (apenas se for compilar assets com Vite)
-- **MySQL 8** (apenas produção; dev e CI usam SQLite)
+- **MySQL 8** (dev e produção; o CI usa SQLite em memória)
 
 ---
 
 ## Instalação
 
-### Setup rápido
+### Setup rápido (dev, MySQL)
 
 ```bash
-git clone <url-do-repositório> obede
+# 1. Clonar e instalar dependências
+git clone https://github.com/AlvesCosta08/obede.git obede
 cd obede
-
 composer install
+
+# 2. Configurar ambiente
 cp .env.example .env
+# Ajuste o .env para dev:
+#   APP_ENV=local
+#   APP_DEBUG=true
+#   APP_URL=http://localhost:8000
+#   DB_CONNECTION=mysql
+#   DB_DATABASE=obede
+#   DB_USERNAME=<seu-usuario>
+#   DB_PASSWORD=<sua-senha>
 php artisan key:generate
 
-# Ajuste o .env para dev (SQLite):
-#   DB_CONNECTION=sqlite
-#   DB_DATABASE=/caminho/absoluto/para/database/database.sqlite
-touch database/database.sqlite
+# 3. Criar o banco (se ainda não existir)
+mysql -u root -p -e "CREATE DATABASE obede CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
+# 4. Rodar migrations
 php artisan migrate
-php artisan obede:demo        # popula com dados de demonstração
-php artisan storage:link      # linka storage público (fotos de perfil)
+
+# 5. Popular com dados de demonstração
+php artisan obede:demo
+
+# 6. Linkar storage público (fotos de perfil)
+php artisan storage:link
+
+# 7. Subir o servidor
 php artisan serve
