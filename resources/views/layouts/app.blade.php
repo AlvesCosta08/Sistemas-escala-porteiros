@@ -16,28 +16,39 @@
             </div>
             
             <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-                <a href="{{ route('dashboard') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.ausencias.*') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
-                    Painel de Ausências
-                </a>
-                <a href="{{ route('admin.escalas.index') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.escalas.index') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
-                    Calendário Mensal
-                </a>
-                <a href="{{ route('admin.escalas.gerenciar') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.escalas.gerenciar') || request()->routeIs('admin.escalas.alocacoes.*') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
-                    Gestão de Escalas
-                </a>
-                
-                <div class="pt-4 pb-2">
-                    <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cadastros</p>
-                </div>
-                <a href="{{ route('admin.usuarios.index') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.usuarios.*') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
-                    Colaboradores
-                </a>
-                <a href="{{ route('admin.postos.index') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.postos.*') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
-                    Postos de Trabalho
-                </a>
-                <a href="{{ route('admin.turnos.index') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.turnos.*') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
-                    Turnos
-                </a>
+                @if(auth()->user()->isAdmin())
+                    <!-- MENU ADMIN -->
+                    <a href="{{ route('dashboard') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.ausencias.*') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
+                        Painel de Ausências
+                    </a>
+                    <a href="{{ route('admin.escalas.index') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.escalas.index') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
+                        Calendário Mensal
+                    </a>
+                    <a href="{{ route('admin.escalas.gerenciar') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.escalas.gerenciar') || request()->routeIs('admin.escalas.alocacoes.*') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
+                        Gestão de Escalas
+                    </a>
+                    
+                    <div class="pt-4 pb-2">
+                        <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cadastros</p>
+                    </div>
+                    <a href="{{ route('admin.usuarios.index') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.usuarios.*') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
+                        Colaboradores
+                    </a>
+                    <a href="{{ route('admin.postos.index') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.postos.*') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
+                        Postos de Trabalho
+                    </a>
+                    <a href="{{ route('admin.turnos.index') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('admin.turnos.*') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
+                        Turnos
+                    </a>
+                @else
+                    <!-- MENU COLABORADOR -->
+                    <a href="{{ route('minha-escala') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('minha-escala') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
+                        Minha Escala
+                    </a>
+                    <a href="{{ route('perfil.edit') }}" class="block px-4 py-2.5 rounded-lg hover:bg-gray-800 {{ request()->routeIs('perfil.edit') ? 'bg-gray-800 text-blue-400 border-l-4 border-blue-400' : '' }}">
+                        Meu Perfil
+                    </a>
+                @endif
             </nav>
 
             <div class="p-4 border-t border-gray-800">

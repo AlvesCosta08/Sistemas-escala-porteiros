@@ -1,42 +1,62 @@
 @extends('layouts.app')
 
-@section('title', 'Meu perfil')
+@section('title', 'Meu Perfil')
+@section('header', 'Meu Perfil')
 
 @section('content')
-    <h1 class="mb-4 text-xl font-bold">Meu perfil</h1>
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 h-32"></div>
+        
+        <div class="px-8 pb-8">
+            <div class="relative flex justify-between items-end -mt-12 mb-6">
+                <div class="flex items-end gap-6">
+                    <div class="w-24 h-24 rounded-full border-4 border-white bg-gray-200 shadow-md overflow-hidden">
+                        @if(auth()->user()->foto_thumb_path)
+                            <img src="{{ Storage::disk('public')->url(auth()->user()->foto_thumb_path) }}" alt="Foto de Perfil" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-400">
+                                {{ substr(auth()->user()->name, 0, 1) }}
+                            </div>
+                        @endif
+                    </div>
+                    <div class="pb-1">
+                        <h2 class="text-2xl font-bold text-gray-800">{{ auth()->user()->name }}</h2>
+                        <p class="text-gray-500">{{ auth()->user()->email }}</p>
+                    </div>
+                </div>
+                <div class="pb-1">
+                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                        {{ auth()->user()->cargo }}
+                    </span>
+                </div>
+            </div>
 
-    <section class="mb-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <div class="flex items-center gap-4">
-            <x-avatar :user="$user" size="h-16 w-16" />
-            <div class="min-w-0">
-                <p class="truncate text-sm font-semibold">{{ $user->name }}</p>
-                <p class="text-xs text-slate-500">{{ ucfirst($user->cargo) }}</p>
-                <p class="text-xs text-slate-500">{{ $user->email }}</p>
+            <hr class="border-gray-100 my-6">
+
+            <div class="max-w-md">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Atualizar Foto de Perfil</h3>
+                <p class="text-sm text-gray-500 mb-4">Envie uma foto nítida do seu rosto. Formatos aceitos: JPG, PNG. Tamanho máximo: 2MB.</p>
+
+                @if ($errors->any())
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <form action="{{ route('perfil.foto.update') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    <div>
+                        <input type="file" name="foto" required accept="image/*"
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors">
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-colors">
+                        Salvar Nova Foto
+                    </button>
+                </form>
             </div>
         </div>
-
-        <form method="POST" action="{{ route('perfil.foto.update') }}"
-              enctype="multipart/form-data"
-              class="mt-4 space-y-2 border-t border-slate-100 pt-4">
-            @csrf
-            <label for="foto" class="block text-sm font-medium">
-                Trocar foto (JPG, PNG ou WEBP · máx. 2 MB)
-            </label>
-            <input id="foto" type="file" name="foto"
-                   accept=".jpg,.jpeg,.png,.webp"
-                   class="w-full text-sm">
-            @error('foto')
-                <p class="text-xs text-red-600">{{ $message }}</p>
-            @enderror
-            <button type="submit"
-                    class="w-full rounded-lg bg-slate-900 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-                Salvar foto
-            </button>
-        </form>
-    </section>
-
-    <a href="{{ route('dashboard') }}"
-       class="text-sm text-slate-500 hover:text-slate-800">
-        ← Voltar
-    </a>
+    </div>
+</div>
 @endsection
