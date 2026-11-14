@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\AlocacaoController;
 use App\Http\Controllers\Admin\AusenciaController;
 use App\Http\Controllers\Admin\EscalaController;
 use App\Http\Controllers\Admin\PostoController; 
-use App\Http\Controllers\Admin\TurnoController; // <-- ADICIONADO AQUI
+use App\Http\Controllers\Admin\TurnoController;
 use App\Http\Controllers\Admin\UserController; 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Colaborador\AvisoAusenciaController;
@@ -66,8 +67,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('ausencias/{aviso}/rejeitar', [AusenciaController::class, 'rejeitar'])
             ->name('ausencias.rejeitar');
 
-        Route::get('escalas', [EscalaController::class, 'index'])
-            ->name('escalas.index');
+        // --- ROTAS DE GERENCIAMENTO DE ESCALAS ---
+        Route::get('escalas', [EscalaController::class, 'index'])->name('escalas.index'); // Calendário
+        Route::get('escalas/gerenciar', [EscalaController::class, 'gerenciar'])->name('escalas.gerenciar'); // Lista de Gestão
+        Route::post('escalas', [EscalaController::class, 'store'])->name('escalas.store');
+        Route::patch('escalas/{escala}/publicar', [EscalaController::class, 'publicar'])->name('escalas.publicar');
+
+        // --- ROTAS DE ALOCAÇÃO ---
+        Route::get('escalas/{escala}/alocacoes', [AlocacaoController::class, 'index'])->name('escalas.alocacoes.index');
+        Route::post('escalas/{escala}/alocacoes', [AlocacaoController::class, 'store'])->name('escalas.alocacoes.store');
+        Route::delete('escalas/{escala}/alocacoes/{alocacao}', [AlocacaoController::class, 'destroy'])->name('escalas.alocacoes.destroy');
 
         // --- ROTAS DE GERENCIAMENTO DE USUÁRIOS ---
         Route::get('usuarios', [UserController::class, 'index'])->name('usuarios.index');
@@ -88,12 +97,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('postos/{posto}/edit', [PostoController::class, 'edit'])->name('postos.edit');
         Route::put('postos/{posto}', [PostoController::class, 'update'])->name('postos.update');
 
-        // --- ROTAS DE GERENCIAMENTO DE TURNOS (ADICIONADAS AQUI) ---
+        // --- ROTAS DE GERENCIAMENTO DE TURNOS ---
         Route::get('turnos', [TurnoController::class, 'index'])->name('turnos.index');
         Route::get('turnos/create', [TurnoController::class, 'create'])->name('turnos.create');
         Route::post('turnos', [TurnoController::class, 'store'])->name('turnos.store');
         Route::get('turnos/{turno}/edit', [TurnoController::class, 'edit'])->name('turnos.edit');
         Route::put('turnos/{turno}', [TurnoController::class, 'update'])->name('turnos.update');
-        // -----------------------------------------------------------
     });
 });
