@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,21 +12,27 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable([
-    'name',
-    'email',
-    'password',
-    'cargo',
-    'phone',
-    'foto_path',
-    'foto_thumb_path',
-    'active',
-])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
+
+    // Sintaxe clássica do Laravel (mais segura)
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'cargo',
+        'phone',
+        'foto_path',
+        'foto_thumb_path',
+        'active',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     protected function casts(): array
     {
@@ -88,16 +92,6 @@ class User extends Authenticatable
     // Elegibilidade para substituição (ciclo 3)
     // ---------------------------------------------------------------------
 
-    /**
-     * Retorna os colaboradores elegíveis para substituir o solicitante
-     * de uma alocação, aplicando três regras:
-     *
-     *   R1 — mesma função (cargo) do solicitante
-     *   R2 — sem alocação no mesmo dia + turno da alocação proposta
-     *   R3 — sem violação do intervalo mínimo de 11h entre turnos
-     *
-     * @return Collection<int, User>
-     */
     public static function elegiveisParaSubstituir(Alocacao $alocacao): Collection
     {
         $solicitante = $alocacao->user;
@@ -111,12 +105,8 @@ class User extends Authenticatable
             ->values();
     }
 
-    /**
-     * Verifica se o colaborador tem conflito de escala com a alocação proposta.
-     */
     protected static function temConflitoDeEscala(int $userId, Alocacao $alocacao): bool
     {
-        // R2 — mesmo dia + mesmo turno
         $conflitoDireto = Alocacao::query()
             ->where('user_id', $userId)
             ->whereDate('data', $alocacao->data)
@@ -128,7 +118,6 @@ class User extends Authenticatable
             return true;
         }
 
-        // R3 — intervalo mínimo de 11h
         $propostoInicio = Carbon::parse(
             $alocacao->data->format('Y-m-d').' '.$alocacao->turno->hora_inicio
         );

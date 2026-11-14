@@ -29,7 +29,7 @@
                     <td class="py-4 px-4">
                         <div class="flex items-center">
                             @if($user->foto_thumb_path)
-                                <img class="w-10 h-10 rounded-full mr-3 object-cover shadow-sm border border-gray-200" src="{{ Storage::disk('public')->url($user->foto_thumb_path) }}" alt="">
+                                <img class="w-10 h-10 rounded-full mr-3 object-cover shadow-sm border border-gray-200" src="{{ $user->fotoThumbUrl() }}" alt="">
                             @else
                                 <div class="w-10 h-10 rounded-full mr-3 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-sm font-bold text-gray-500 shadow-sm border border-gray-200">
                                     {{ substr($user->name, 0, 1) }}
