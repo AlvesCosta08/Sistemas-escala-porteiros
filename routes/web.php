@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Admin\AusenciaController;
 use App\Http\Controllers\Admin\EscalaController;
-use App\Http\Controllers\Admin\UserController; // <-- ADICIONADO AQUI
+use App\Http\Controllers\Admin\PostoController; 
+use App\Http\Controllers\Admin\TurnoController; // <-- ADICIONADO AQUI
+use App\Http\Controllers\Admin\UserController; 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Colaborador\AvisoAusenciaController;
 use App\Http\Controllers\Colaborador\MinhaEscalaController;
@@ -67,17 +69,31 @@ Route::middleware(['auth'])->group(function () {
         Route::get('escalas', [EscalaController::class, 'index'])
             ->name('escalas.index');
 
-        // --- ROTAS DE GERENCIAMENTO DE USUÁRIOS (ADICIONADAS AQUI) ---
+        // --- ROTAS DE GERENCIAMENTO DE USUÁRIOS ---
         Route::get('usuarios', [UserController::class, 'index'])->name('usuarios.index');
         Route::get('usuarios/create', [UserController::class, 'create'])->name('usuarios.create');
         Route::post('usuarios', [UserController::class, 'store'])->name('usuarios.store');
         Route::get('usuarios/{user}/edit', [UserController::class, 'edit'])->name('usuarios.edit');
         Route::put('usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
         Route::patch('usuarios/{user}/toggle', [UserController::class, 'toggle'])->name('usuarios.toggle');
-        // -------------------------------------------------------------
 
         // Admin troca a foto de qualquer usuário
         Route::post('usuarios/{user}/foto', [PerfilController::class, 'updateFotoAdmin'])
             ->name('usuarios.foto.update');
+
+        // --- ROTAS DE GERENCIAMENTO DE POSTOS ---
+        Route::get('postos', [PostoController::class, 'index'])->name('postos.index');
+        Route::get('postos/create', [PostoController::class, 'create'])->name('postos.create');
+        Route::post('postos', [PostoController::class, 'store'])->name('postos.store');
+        Route::get('postos/{posto}/edit', [PostoController::class, 'edit'])->name('postos.edit');
+        Route::put('postos/{posto}', [PostoController::class, 'update'])->name('postos.update');
+
+        // --- ROTAS DE GERENCIAMENTO DE TURNOS (ADICIONADAS AQUI) ---
+        Route::get('turnos', [TurnoController::class, 'index'])->name('turnos.index');
+        Route::get('turnos/create', [TurnoController::class, 'create'])->name('turnos.create');
+        Route::post('turnos', [TurnoController::class, 'store'])->name('turnos.store');
+        Route::get('turnos/{turno}/edit', [TurnoController::class, 'edit'])->name('turnos.edit');
+        Route::put('turnos/{turno}', [TurnoController::class, 'update'])->name('turnos.update');
+        // -----------------------------------------------------------
     });
 });
