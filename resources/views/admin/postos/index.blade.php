@@ -4,10 +4,10 @@
 @section('header', 'Postos de Trabalho')
 
 @section('content')
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-    <div class="flex justify-between items-center mb-6">
-        <p class="text-gray-500 text-sm">Locais onde os colaboradores exercem suas funções.</p>
-        <a href="{{ route('admin.postos.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6 card-hover">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <p class="text-slate-500 text-sm">Locais onde os colaboradores exercem suas funções.</p>
+        <a href="{{ route('admin.postos.create') }}" class="w-full md:w-auto text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl btn-interactive text-sm shadow-indigo-500/30">
             + Novo Posto
         </a>
     </div>
@@ -15,25 +15,23 @@
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="bg-gray-50 text-gray-600 uppercase text-xs leading-normal border-b border-gray-200">
-                    <th class="py-3 px-4 font-semibold">Nome do Posto</th>
-                    <th class="py-3 px-4 font-semibold">Descrição</th>
-                    <th class="py-3 px-4 font-semibold text-center">Ações</th>
+                <tr class="bg-slate-50 text-slate-500 uppercase text-xs tracking-wider border-b border-slate-200">
+                    <th class="py-4 px-2 md:px-4 font-bold rounded-tl-xl">Nome do Posto</th>
+                    <th class="hidden md:table-cell py-4 px-4 font-bold">Descrição</th>
+                    <th class="py-4 px-2 md:px-4 font-bold text-center rounded-tr-xl">Ações</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-600 text-sm">
+            <tbody class="text-slate-600 text-sm divide-y divide-slate-100">
                 @forelse($postos as $posto)
-                <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="py-3 px-4 font-medium">{{ $posto->nome }}</td>
-                    <td class="py-3 px-4">{{ $posto->descricao ?? '-' }}</td>
-                    <td class="py-3 px-4 text-center">
-                        <a href="{{ route('admin.postos.edit', $posto) }}" class="text-orange-500 hover:text-orange-700 font-semibold text-xs">Editar</a>
+                <tr class="hover:bg-slate-50/80 transition-colors group">
+                    <td class="py-4 px-2 md:px-4 font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{{ $posto->nome }}</td>
+                    <td class="hidden md:table-cell py-4 px-4">{{ $posto->descricao ?? '-' }}</td>
+                    <td class="py-4 px-2 md:px-4 text-center">
+                        <a href="{{ route('admin.postos.edit', $posto) }}" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs transition-colors">Editar</a>
                     </td>
                 </tr>
                 @empty
-                <tr>
-                    <td colspan="3" class="py-6 text-center text-gray-500">Nenhum posto cadastrado.</td>
-                </tr>
+                <tr><td colspan="3" class="py-8 text-center text-slate-400">Nenhum posto cadastrado.</td></tr>
                 @endforelse
             </tbody>
         </table>

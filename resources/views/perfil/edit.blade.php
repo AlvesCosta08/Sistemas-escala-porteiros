@@ -14,8 +14,11 @@
                         @if(auth()->user()->foto_thumb_path)
                             <img src="{{ auth()->user()->fotoThumbUrl() }}" alt="Foto de Perfil" class="w-full h-full object-cover">
                         @else
-                            <div class="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-400">
-                                {{ substr(auth()->user()->name, 0, 1) }}
+                            <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <span class="hidden">{{ substr(auth()->user()->name, 0, 1) }}</span>
                             </div>
                         @endif
                     </div>
